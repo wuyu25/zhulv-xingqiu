@@ -140,6 +140,19 @@ textarea:focus{border-color:var(--pink);background:#fff;box-shadow:0 0 0 3px rgb
 .exercise-item .ex-name{font-size:14px;font-weight:800;color:var(--mint-deep);margin-bottom:5px}
 .exercise-item .ex-desc{font-size:12px;color:var(--text2);line-height:1.75}
 .exercise-item .ex-meta{font-size:11px;color:var(--text3);margin-top:5px;font-weight:600}
+.knowledge-card{cursor:pointer;transition:all .15s;position:relative}
+.knowledge-card:hover{transform:translateY(-1px)}
+.knowledge-card:active{transform:scale(.97);opacity:.85}
+.knowledge-card::after{content:"🔗";position:absolute;top:10px;right:12px;font-size:12px;opacity:.5}
+.english-card{cursor:pointer;transition:all .15s;position:relative}
+.english-card:hover{transform:translateY(-1px)}
+.english-card:active{transform:scale(.97);opacity:.85}
+.english-card::after{content:"🔊";position:absolute;top:10px;right:12px;font-size:12px;opacity:.5}
+.exercise-item{cursor:pointer;transition:all .15s;position:relative}
+.exercise-item:hover{transform:translateY(-1px)}
+.exercise-item:active{transform:scale(.97);opacity:.85}
+.exercise-item::after{content:"🎬";position:absolute;top:10px;right:12px;font-size:12px;opacity:.5}
+
 
 .english-card{background:linear-gradient(135deg,#f0e6ff,#fff);border-radius:18px;padding:14px;margin-bottom:9px;border:2px solid var(--purple-light)}
 .english-card .ec-type{font-size:11px;color:var(--purple-deep);font-weight:800;margin-bottom:5px}
@@ -428,7 +441,7 @@ textarea:focus{border-color:var(--pink);background:#fff;box-shadow:0 0 0 3px rgb
 <div class="tabbar">
   <div class="tab-item active" onclick="switchTab('diet')"><div class="ti">🍽️</div><div class="tl">饮食</div></div>
   <div class="tab-item" onclick="switchTab('weight')"><div class="ti">⚖️</div><div class="tl">体重</div></div>
-  <div class="tab-item" onclick="switchTab('study')"><div class="ti">📚</div><div class="tl">学练</div></div>
+  <div class="tab-item" onclick="switchTab('study')"><div class="ti">📚</div><div class="tl">自律</div></div>
   <div class="tab-item" onclick="switchTab('expense')"><div class="ti">💰</div><div class="tl">开支</div></div>
   <div class="tab-item" onclick="switchTab('sleep')"><div class="ti">😴</div><div class="tl">睡眠</div></div>
 </div>
@@ -761,30 +774,43 @@ function renderWeight(){
 }
 
 /* ============ 学习运动板块 ============ */
+function openSearch(query){
+  window.open('https://www.bilibili.com/search?keyword='+encodeURIComponent(query),'_blank');
+}
+function speakEnglish(text){
+  if(window.speechSynthesis){
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='en-US';u.rate=0.85;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+    toast('🔊 朗读中...');
+  }else{toast('浏览器不支持朗读😢');}
+}
 function renderStudy(){
   const idx=dayIndex(currentStudyDate);
   const kn=KNOWLEDGE[idx%KNOWLEDGE.length];
+  const v=VIDEO_TOPICS[idx%VIDEO_TOPICS.length];
   $('knowledgeContent').innerHTML=`
-    <div class="knowledge-card"><div class="kc-cat">💡 ${kn.cat}</div><div class="kc-title">${kn.title}</div><div class="kc-summary">${kn.summary}</div></div>
-    ${(() =>{const v=VIDEO_TOPICS[idx%VIDEO_TOPICS.length];return `<div class="knowledge-card" style="background:linear-gradient(135deg,#e3faf2,#fff);border-color:var(--mint-light)"><div class="kc-cat" style="color:var(--mint-deep)">🎬 ${v.cat}·干货视频</div><div class="kc-title">${v.title}</div><div class="kc-summary">${v.platform}</div></div>`})()}
+    <div class="knowledge-card" onclick="openSearch('${encodeURIComponent(kn.title)}')"><div class="kc-cat">💡 ${kn.cat}</div><div class="kc-title">${kn.title}</div><div class="kc-summary">${kn.summary}</div></div>
+    <div class="knowledge-card" style="background:linear-gradient(135deg,#e3faf2,#fff);border-color:var(--mint-light)" onclick="openSearch('${encodeURIComponent(v.title)}')"><div class="kc-cat" style="color:var(--mint-deep)">🎬 ${v.cat}·干货视频</div><div class="kc-title">${v.title}</div><div class="kc-summary">点击跳转B站搜索相关视频 →</div></div>
   `;
   const en1=ENGLISH[idx%ENGLISH.length];
   const en2=ENGLISH[(idx+7)%ENGLISH.length];
   const en3=ENGLISH[(idx+13)%ENGLISH.length];
   $('englishContent').innerHTML=`
-    <div class="english-card"><div class="ec-type">📖 ${en1.type}</div><div class="ec-en">${en1.en}</div><div class="ec-cn">${en1.cn}</div></div>
-    <div class="english-card"><div class="ec-type">📖 ${en2.type}</div><div class="ec-en">${en2.en}</div><div class="ec-cn">${en2.cn}</div></div>
-    <div class="english-card"><div class="ec-type">📖 ${en3.type}</div><div class="ec-en">${en3.en}</div><div class="ec-cn">${en3.cn}</div></div>
-    <div class="tip-banner" style="margin-bottom:0"><div class="tb-icon">🦄</div><div>试着把今天的短句大声读3遍，用到生活里~</div></div>
+    <div class="english-card" onclick="speakEnglish('${en1.en.replace(/'/g,"\\'")}')"><div class="ec-type">📖 ${en1.type} · 点击朗读</div><div class="ec-en">${en1.en}</div><div class="ec-cn">${en1.cn}</div></div>
+    <div class="english-card" onclick="speakEnglish('${en2.en.replace(/'/g,"\\'")}')"><div class="ec-type">📖 ${en2.type} · 点击朗读</div><div class="ec-en">${en2.en}</div><div class="ec-cn">${en2.cn}</div></div>
+    <div class="english-card" onclick="speakEnglish('${en3.en.replace(/'/g,"\\'")}')"><div class="ec-type">📖 ${en3.type} · 点击朗读</div><div class="ec-en">${en3.en}</div><div class="ec-cn">${en3.cn}</div></div>
+    <div class="tip-banner" style="margin-bottom:0"><div class="tb-icon">🦄</div><div>点击卡片自动朗读英语，每天3遍开口说~</div></div>
   `;
   const ex1=EXERCISES[idx%EXERCISES.length];
   const ex2=EXERCISES[(idx+4)%EXERCISES.length];
   const ex3=EXERCISES[(idx+8)%EXERCISES.length];
   $('exerciseContent').innerHTML=`
-    <div class="exercise-item"><div class="ex-name">${ex1.name}</div><div class="ex-desc">${ex1.desc}</div><div class="ex-meta">${ex1.meta}</div></div>
-    <div class="exercise-item"><div class="ex-name">${ex2.name}</div><div class="ex-desc">${ex2.desc}</div><div class="ex-meta">${ex2.meta}</div></div>
-    <div class="exercise-item"><div class="ex-name">${ex3.name}</div><div class="ex-desc">${ex3.desc}</div><div class="ex-meta">${ex3.meta}</div></div>
-    <div class="tip-banner" style="margin-bottom:0"><div class="tb-icon">🔥</div><div>3个动作循环2~3轮，约15分钟，边看视频边练刚刚好~</div></div>
+    <div class="exercise-item" onclick="openSearch('${encodeURIComponent(ex1.name+' 教程')}')"><div class="ex-name">${ex1.name} 🎬</div><div class="ex-desc">${ex1.desc}</div><div class="ex-meta">${ex1.meta} · 点击查看视频教程</div></div>
+    <div class="exercise-item" onclick="openSearch('${encodeURIComponent(ex2.name+' 教程')}')"><div class="ex-name">${ex2.name} 🎬</div><div class="ex-desc">${ex2.desc}</div><div class="ex-meta">${ex2.meta} · 点击查看视频教程</div></div>
+    <div class="exercise-item" onclick="openSearch('${encodeURIComponent(ex3.name+' 教程')}')"><div class="ex-name">${ex3.name} 🎬</div><div class="ex-desc">${ex3.desc}</div><div class="ex-meta">${ex3.meta} · 点击查看视频教程</div></div>
+    <div class="tip-banner" style="margin-bottom:0"><div class="tb-icon">🔥</div><div>点击每个动作直接跳B站看视频教程~3个动作循环2~3轮约15分钟</div></div>
   `;
   renderPunch();
   renderPunchHistory();
